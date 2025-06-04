@@ -1,6 +1,10 @@
 export default function Calendar() {
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-    const times = Array.from({ length: 14 }, (_, i) => `${8 + i}am`);
+    const times = [
+      "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+      "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM",
+      "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"
+    ];
   
     return (
       <div className="w-2/5">
@@ -14,9 +18,9 @@ export default function Calendar() {
           </div>
           {times.map(time => (
             <div key={time} className="grid grid-cols-6 text-center text-sm border-b">
-              <div className="border-r bg-gray-50">{time}</div>
+              <div className="border-r bg-gray-50 pt-4">{time}</div>
               {days.map((_, i) => (
-                <div key={i} className="border-r h-8"></div>
+                <div key={i} className="border-r h-12"></div>
               ))}
             </div>
           ))}
