@@ -4,6 +4,9 @@ const Calendar = forwardRef((props, ref) => {
   const [addedClasses, setAddedClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [showRegistrationConfirm, setShowRegistrationConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showFailure, setShowFailure] = useState(false);
+  const [conflictingClasses, setConflictingClasses] = useState([]);
   
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const times = [
@@ -112,6 +115,48 @@ const Calendar = forwardRef((props, ref) => {
   // Function to get days string from indices
   const getDaysString = (dayIndices) => {
     return dayIndices.map(index => days[index]).join(", ");
+  };
+
+  // Function to check for time conflicts
+  const checkTimeConflicts = () => {
+    const conflicts = [];
+    
+    // Compare each class with every other class
+    for (let i = 0; i < addedClasses.length; i++) {
+      for (let j = i + 1; j < addedClasses.length; j++) {
+        const class1 = addedClasses[i];
+        const class2 = addedClasses[j];
+        
+        // Check if classes share any days
+        const sharedDays = class1.timeInfo.days.filter(day => 
+          class2.timeInfo.days.includes(day)
+        );
+        
+        // If they share days and have the same time slot, there's a conflict
+        if (sharedDays.length > 0 && class1.timeInfo.timeIndex === class2.timeInfo.timeIndex) {
+          conflicts.push({
+            class1: class1,
+            class2: class2
+          });
+        }
+      }
+    }
+    
+    return conflicts;
+  };
+
+  // Function to handle registration submission
+  const handleRegistrationSubmit = () => {
+    const conflicts = checkTimeConflicts();
+    
+    if (conflicts.length > 0) {
+      setConflictingClasses(conflicts);
+      setShowFailure(true);
+    } else {
+      setShowSuccess(true);
+    }
+    
+    setShowRegistrationConfirm(false);
   };
 
   return (
@@ -227,13 +272,56 @@ const Calendar = forwardRef((props, ref) => {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  // TODO: Handle actual registration submission
-                  setShowRegistrationConfirm(false);
-                }}
+                onClick={handleRegistrationSubmit}
                 className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
               >
                 Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <div className="text-center">
+              <div className="text-4xl mb-4">✅</div>
+              <h3 className="text-xl font-bold mb-2">Success!</h3>
+              <p className="mb-6">Your registration request has been submitted successfully.</p>
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Failure Modal */}
+      {showFailure && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <div className="text-center">
+              <div className="text-4xl mb-4">❌</div>
+              <h3 className="text-xl font-bold mb-2">Registration Failed</h3>
+              <p className="mb-4">The following classes have time conflicts:</p>
+              <div className="mb-6 text-left">
+                {conflictingClasses.map((conflict, index) => (
+                  <div key={index} className="mb-2 p-2 bg-red-50 rounded">
+                    <p className="font-semibold">{conflict.class1.course.courseNumber} ({conflict.class1.section.time})</p>
+                    <p className="font-semibold">{conflict.class2.course.courseNumber} ({conflict.class2.section.time})</p>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowFailure(false)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded"
+              >
+                OK
               </button>
             </div>
           </div>
