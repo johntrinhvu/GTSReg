@@ -22,7 +22,7 @@ export default function ScheduleOfClasses({ calendarRef }) {
     return calendarRef.current.isClassAdded(course, section);
   };
 
-  // Update isAdded state when calendar changes
+  // update isAdded state when calendar changes
   useEffect(() => {
     if (!calendarRef.current || !selectedDepartment) return;
     

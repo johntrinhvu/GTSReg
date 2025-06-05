@@ -15,14 +15,13 @@ const Calendar = forwardRef((props, ref) => {
     "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"
   ];
 
-  // Function to parse time string (e.g., "MW 9:30-10:50" or "TuTh 2:00-3:20p")
   const parseTimeString = (timeStr) => {
     if (!timeStr || timeStr === "TBA") return null;
     
     const [days, timeRange] = timeStr.split(" ");
     const [startTime, endTime] = timeRange.split("-");
     
-    // Convert days to array of indices (0-4)
+    // conv days to array of indices (0-4)
     const dayIndices = [];
     if (days.includes("M")) dayIndices.push(0);
     if (days.includes("Tu")) dayIndices.push(1);
@@ -30,7 +29,6 @@ const Calendar = forwardRef((props, ref) => {
     if (days.includes("Th")) dayIndices.push(3);
     if (days.includes("F")) dayIndices.push(4);
 
-    // Direct mapping of time strings to slot indices
     const timeMap = {
       "8:00": 0, "8:30": 0,
       "9:00": 1, "9:30": 1,
@@ -48,17 +46,9 @@ const Calendar = forwardRef((props, ref) => {
       "9:00": 13, "9:30": 13
     };
 
-    // Clean the time string
     const cleanTime = startTime.replace(/[pPaAmM]/, "").trim();
     const timeIndex = timeMap[cleanTime] || 0;
 
-    console.log('Time parsing:', {
-      originalTime: startTime,
-      cleanTime,
-      timeIndex,
-      matchedSlot: times[timeIndex]
-    });
-    
     return {
       days: dayIndices,
       timeIndex,
@@ -66,7 +56,7 @@ const Calendar = forwardRef((props, ref) => {
     };
   };
 
-  // Function to check if a class is already added
+  // check if a class is already added
   const isClassAdded = (course, section) => {
     return addedClasses.some(c => 
       c.course.courseNumber === course.courseNumber && 
@@ -74,7 +64,7 @@ const Calendar = forwardRef((props, ref) => {
     );
   };
 
-  // Function to add a class to the calendar
+  // add a class to the calendar
   const addClass = (course, section) => {
     const timeInfo = parseTimeString(section.time);
     if (!timeInfo) return;
@@ -86,7 +76,7 @@ const Calendar = forwardRef((props, ref) => {
     }]);
   };
 
-  // Function to remove a class from the calendar
+  // remove a class from the calendar
   const removeClass = (course, section) => {
     setAddedClasses(prev => 
       prev.filter(c => 
@@ -97,14 +87,13 @@ const Calendar = forwardRef((props, ref) => {
     setSelectedClass(null);
   };
 
-  // Expose methods through the ref
   useImperativeHandle(ref, () => ({
     addClass,
     removeClass,
     isClassAdded
   }));
 
-  // Function to check if a cell should display a class
+  // check if a cell should display a class
   const getClassForCell = (dayIndex, timeIndex) => {
     return addedClasses.find(c => 
       c.timeInfo.days.includes(dayIndex) && 
@@ -112,27 +101,27 @@ const Calendar = forwardRef((props, ref) => {
     );
   };
 
-  // Function to get days string from indices
+  // get days string from indices
   const getDaysString = (dayIndices) => {
     return dayIndices.map(index => days[index]).join(", ");
   };
 
-  // Function to check for time conflicts
+  // check for time conflicts
   const checkTimeConflicts = () => {
     const conflicts = [];
     
-    // Compare each class with every other class
+    // compare each class with every other class
     for (let i = 0; i < addedClasses.length; i++) {
       for (let j = i + 1; j < addedClasses.length; j++) {
         const class1 = addedClasses[i];
         const class2 = addedClasses[j];
         
-        // Check if classes share any days
+        // check if classes share any days
         const sharedDays = class1.timeInfo.days.filter(day => 
           class2.timeInfo.days.includes(day)
         );
         
-        // If they share days and have the same time slot, there's a conflict
+        // if they share days and have the same time slot, there's a conflict
         if (sharedDays.length > 0 && class1.timeInfo.timeIndex === class2.timeInfo.timeIndex) {
           conflicts.push({
             class1: class1,
@@ -145,7 +134,7 @@ const Calendar = forwardRef((props, ref) => {
     return conflicts;
   };
 
-  // Function to handle registration submission
+  // handle registration submission
   const handleRegistrationSubmit = () => {
     const conflicts = checkTimeConflicts();
     
